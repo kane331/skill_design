@@ -23,6 +23,7 @@
     "robot_mapping_reader": [],
     "excel_loading": [],
     "pytest_bdd_extensions": [],
+    "bdd_wording_style": [],
     "reusable_target_symbols": [],
     "target_call_relationships": [],
     "validation_commands": []
@@ -30,7 +31,7 @@
 }
 ```
 
-`reusable_target_symbols` 必须记录可复用的 Feature、Step Definition、Page Object、Fixture 或 helper 的文件、符号、行为摘要、参数/返回值约束和证据 ID。`target_call_relationships` 仅记录可由源码直接证实的调用方、被调用符号、导出边界、继承或覆写关系及证据 ID。`source_fingerprints` 只能包含直接支撑 `project_evidence` 和 `project_patterns` 结论的最小常规文件集，不得作为项目文件清单。每个引用来源都必须出现在该集合中，且每个集合成员都必须支撑至少一项记录的结论。`project_evidence` 和 `project_patterns` 只能包含与项目通用结构、数据读取规则、目标项目扩展点和验证命令有关的证据。不得写入任何单独 case 的映射、行号、流程、定位器或断言。`project-analysis.md` 必须仅由该 JSON 派生，并使用脱敏摘要。
+`bdd_wording_style` 必须记录目标项目已有 Feature 的语言、Given/When/Then 等关键字用法、动作描述的简洁措辞模式，以及对应的文件、步骤位置和证据 ID。`reusable_target_symbols` 必须记录可复用的 Feature、Step Definition、Page Object、Fixture 或 helper 的文件、符号、行为摘要、参数/返回值约束和证据 ID。`target_call_relationships` 仅记录可由源码直接证实的调用方、被调用符号、导出边界、继承或覆写关系及证据 ID。`source_fingerprints` 只能包含直接支撑 `project_evidence` 和 `project_patterns` 结论的最小常规文件集，不得作为项目文件清单。每个引用来源都必须出现在该集合中，且每个集合成员都必须支撑至少一项记录的结论。`project_evidence` 和 `project_patterns` 只能包含与项目通用结构、数据读取规则、目标项目扩展点和验证命令有关的证据。不得写入任何单独 case 的映射、行号、流程、定位器或断言。`project-analysis.md` 必须仅由该 JSON 派生，并使用脱敏摘要。
 
 `baseline-validation` 输出 `missing`、`valid`、`stale` 或 `invalid`。只有路径、`schema_version` 和全部来源指纹均匹配时才是 `valid`；`missing`、`stale` 和 `invalid` 必须进入完整 `project-analysis` 并重建两个基线文件。`valid` 时进入 `case-analysis`，只复用已验证的项目级证据，仍须输出旧项目到新项目的当前 case 证据索引以及 `data.mapping`：
 
@@ -71,7 +72,9 @@
 
 流程审计 `approved` 后，总控在 `artifacts_root/cases/<case_id>/<run_id>/case-evidence.json` 写入当前 run 的映射、`excel_selection`、追踪流程、审计结论和全部引用证据。该档案必须包含 `case_id`、`run_id`、来源证据 ID 和来源摘要；后续方案、实施、验证和审查阶段优先消费它，遇到缺失、冲突或需要确认 diff 影响时才回读来源。每次新运行都必须新建证据包，不能用它替代新运行的映射门禁或流程追踪。
 
-迁移方案只有 `approved` 才能实施。`data.changes` 的每项必须含 `target_file`、`target_symbol`、`change_type`、`legacy_evidence_ids`、`target_evidence_ids`、`validation_source`、`reuse_decision`、`candidate_symbols` 和 `compatibility_impact`。
+迁移方案只有 `approved` 才能实施。`data.changes` 的每项必须含 `target_file`、`target_symbol`、`change_type`、`legacy_evidence_ids`、`target_evidence_ids`、`validation_source`、`reuse_decision`、`candidate_symbols` 和 `compatibility_impact`。新增或修改 Feature 时，还必须包含 `bdd_style_evidence_ids` 和 `bdd_descriptions`。
+
+`bdd_descriptions` 必须为每个 Given/When/Then 步骤提供拟写描述及其对应旧流程证据。描述必须与 `bdd_style_evidence_ids` 指向的现有 Feature 在语言、关键字和简洁程度上保持一致；每条只表达一个业务前提、动作或结果，不得包含定位器、等待、函数名、参数实现或其他技术细节。若没有可证明的现有 BDD 文案风格，方案必须返回 `needs-human`，不得自行发明风格。
 
 `reuse_decision` 只能是 `reuse`、`compose`、`new-case-specific`、`new-shared` 或 `modify-existing`。`candidate_symbols` 必须列出已检查的可复用目标符号、证据 ID，以及未选用时基于参数、前置条件、等待、断言或行为语义的排除理由；不得凭名称相似性排除或复用。只有不存在可证明满足需求的候选能力时，才可选择 `new-case-specific` 或 `new-shared`。
 

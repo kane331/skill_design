@@ -1,4 +1,4 @@
-# Robot 到 pytest-bdd 迁移 Skill 首次使用指南
+# Robot 到 pytest-bdd 迁移 Skill
 
 本指南用于运行 [Robot 到 pytest-bdd 用例迁移 Skill](.github/skills/robot-pytest-bdd-migration/SKILL.md)。每次任务只迁移一个由 `case_id` 唯一指定的 Robot Framework 移动端用例。
 

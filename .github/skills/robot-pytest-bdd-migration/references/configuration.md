@@ -9,10 +9,6 @@
 	"test_case_excel": "/path/to/test-case.xlsx",
 	"test_data_excel": "/path/to/test-data.xlsx",
 	"artifacts_root": "/path/to/migration-artifacts",
-	"cloud": {
-		"trigger": {"executable": "company-cloud-cli", "args": ["trigger", "{case_id}", "{test_selector}"]},
-		"poll": {"executable": "company-cloud-cli", "args": ["poll", "{case_id}"]}
-	},
 	"max_attempts": 3
 }
 ```
@@ -22,8 +18,16 @@
 - `test_case_excel`：旧项目参数配置 Excel；其中的执行 flag Sheet 完全不进入选择契约、迁移数据或控制条件。
 - `test_data_excel`：多 Sheet、多行实际测试数据 Excel。
 - `artifacts_root`：脱敏工件根目录。
-- `cloud.trigger`、`cloud.poll`：必须分别由 `executable` 和 `args` 表达，禁止 shell 字符串。允许占位符：`{case_id}`、`{test_selector}`、`{run_dir}`、`{config_path}`。
 - `max_attempts`：每类循环的上限，只能是 1 到 3。
 - `sensitive_field_patterns`：额外需要脱敏的字段名正则表达式。
 
-云端命令的标准输出必须是单个 JSON 对象。不要将凭据写入配置；应由企业已有的身份、密钥链或受控运行环境提供。总控 agent 必须把配置值视为运行参数，而不是业务逻辑或证据。
+总控在 `artifacts_root/project-baseline/` 自动维护以下可复用档案，无需额外配置字段：
+
+- `project-analysis.json`：供 agent 读取的结构化项目级证据索引。
+- `project-analysis.md`：由 JSON 派生的脱敏人工审阅文档。
+
+基线档案不是当前 case 的迁移结论。每次执行都必须核验其格式版本、规范化后的配置路径，以及所有已记录来源的 SHA-256 指纹；任一项不匹配、文件不可访问、档案不可解析或关键证据缺失时，必须视为无效并重建。
+
+总控还会在 `artifacts_root/cases/<case_id>/<run_id>/case-evidence.json` 归档当前执行的脱敏 case 证据包。它仅在本次运行的后续阶段使用，不可作为后续运行的缓存或跳过 case 级分析的依据。
+
+配置不得包含凭据。总控 agent 必须把配置值视为运行参数，而不是业务逻辑或证据。
